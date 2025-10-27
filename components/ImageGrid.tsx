@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Dish } from '../types';
 import ImageCard from './ImageCard';
 import LoaderIcon from './icons/LoaderIcon';
@@ -10,45 +10,127 @@ interface ImageGridProps {
 }
 
 const ImageGrid: React.FC<ImageGridProps> = ({ dishes, isLoading }) => {
+  const spinValue = React.useRef(new Animated.Value(0)).current;
   const hasPendingOrGenerating = dishes.some(d => d.status === 'pending' || d.status === 'generating');
   const showGrid = dishes.length > 0;
 
+  React.useEffect(() => {
+    if (isLoading || hasPendingOrGenerating) {
+      Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      ).start();
+    }
+  }, [isLoading, hasPendingOrGenerating]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   if (isLoading && dishes.length === 0) {
     return (
-      <div className="text-center py-10">
-        <div className="inline-block animate-spin">
-            <LoaderIcon className="w-12 h-12 text-amber-500" />
-        </div>
-        <p className="mt-4 text-lg text-gray-400">Parsing your menu...</p>
-      </div>
+      <View style={styles.centerContainer}>
+        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+          <LoaderIcon width={48} height={48} color="#F59E0B" />
+        </Animated.View>
+        <Text style={styles.loadingText}>Parsing your menu...</Text>
+      </View>
     );
   }
 
   if (!showGrid) {
     return (
-      <div className="text-center py-20 border-2 border-dashed border-gray-700 rounded-2xl">
-        <p className="text-xl text-gray-500">Your generated food photos will appear here.</p>
-      </div>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Your generated food photos will appear here.</Text>
+      </View>
     );
   }
 
   return (
-    <div>
-        {hasPendingOrGenerating && (
-             <div className="text-center mb-6 flex items-center justify-center">
-                 <div className="inline-block animate-spin mr-3">
-                    <LoaderIcon className="w-6 h-6 text-amber-500" />
-                 </div>
-                <p className="text-lg text-gray-400">Generating images... This may take a moment.</p>
-            </div>
-        )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {dishes.map((dish) => (
-          <ImageCard key={dish.id} dish={dish} />
-        ))}
-      </div>
-    </div>
+    <View>
+      {hasPendingOrGenerating && (
+        <View style={styles.generatingHeader}>
+          <Animated.View style={{ transform: [{ rotate: spin }], marginRight: 12 }}>
+            <LoaderIcon width={24} height={24} color="#F59E0B" />
+          </Animated.View>
+          <Text style={styles.generatingText}>Generating images... This may take a moment.</Text>
+        </View>
+      )}
+      <View style={styles.grid}>
+        {dishes.reduce<React.ReactNode[]>((rows, dish, index) => {
+          if (index % 2 === 0) {
+            rows.push(
+              <View key={dish.id} style={styles.row}>
+                <View style={styles.cardWrapper}>
+                  <ImageCard dish={dish} />
+                </View>
+                {dishes[index + 1] && (
+                  <View style={styles.cardWrapper}>
+                    <ImageCard dish={dishes[index + 1]} />
+                  </View>
+                )}
+              </View>
+            );
+          }
+          return rows;
+        }, [])}
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  centerContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: '#9CA3AF',
+  },
+  emptyContainer: {
+    paddingVertical: 80,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#374151',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 20,
+    color: '#6B7280',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  generatingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  generatingText: {
+    fontSize: 18,
+    color: '#9CA3AF',
+  },
+  grid: {
+    paddingBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 16,
+  },
+  cardWrapper: {
+    flex: 1,
+  },
+});
 
 export default ImageGrid;

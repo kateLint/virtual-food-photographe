@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { PhotoStyle } from '../types';
 
 interface StyleSelectorProps {
@@ -7,7 +7,7 @@ interface StyleSelectorProps {
   onChange: (style: PhotoStyle) => void;
 }
 
-const styles = [
+const styles_data = [
   { id: PhotoStyle.MODERN, label: "Bright & Modern", description: "Clean, minimalist, and full of light." },
   { id: PhotoStyle.RUSTIC, label: "Rustic & Dark", description: "Moody, textured, and dramatic." },
   { id: PhotoStyle.SOCIAL, label: "Social Media Ready", description: "Vibrant, top-down, and eye-catching." },
@@ -15,42 +15,94 @@ const styles = [
 
 const StyleSelector: React.FC<StyleSelectorProps> = ({ selectedStyle, onChange }) => {
   return (
-    <div>
-      <h3 className="block text-lg font-semibold text-gray-200 mb-3">
-        2. Choose a Style
-      </h3>
-      <div className="space-y-3">
-        {styles.map((style) => (
-          <label
+    <View>
+      <Text style={styles.heading}>2. Choose a Style</Text>
+      <View style={styles.container}>
+        {styles_data.map((style) => (
+          <TouchableOpacity
             key={style.id}
-            htmlFor={style.id}
-            className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-              selectedStyle === style.id
-                ? 'bg-amber-500/10 border-amber-500'
-                : 'bg-gray-900 border-gray-600 hover:border-gray-500'
-            }`}
+            onPress={() => onChange(style.id)}
+            style={[
+              styles.option,
+              selectedStyle === style.id ? styles.optionSelected : styles.optionUnselected
+            ]}
           >
-            <input
-              type="radio"
-              id={style.id}
-              name="photo-style"
-              value={style.id}
-              checked={selectedStyle === style.id}
-              onChange={() => onChange(style.id)}
-              className="hidden"
-            />
-            <div className="flex-grow">
-              <span className="font-bold text-gray-100">{style.label}</span>
-              <p className="text-sm text-gray-400">{style.description}</p>
-            </div>
-             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedStyle === style.id ? 'border-amber-500' : 'border-gray-500'}`}>
-                {selectedStyle === style.id && <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>}
-            </div>
-          </label>
+            <View style={[
+              styles.radio,
+              selectedStyle === style.id ? styles.radioSelected : styles.radioUnselected
+            ]}>
+              {selectedStyle === style.id && <View style={styles.radioDot} />}
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.label}>{style.label}</Text>
+              <Text style={styles.description}>{style.description}</Text>
+            </View>
+          </TouchableOpacity>
         ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  heading: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#E5E7EB',
+    marginBottom: 12,
+  },
+  container: {
+    gap: 12,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 2,
+    borderRadius: 8,
+  },
+  optionSelected: {
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderColor: '#F59E0B',
+  },
+  optionUnselected: {
+    backgroundColor: '#111827',
+    borderColor: '#4B5563',
+  },
+  textContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  label: {
+    fontWeight: '700',
+    color: '#F3F4F6',
+    fontSize: 16,
+  },
+  description: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioSelected: {
+    borderColor: '#F59E0B',
+  },
+  radioUnselected: {
+    borderColor: '#6B7280',
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#F59E0B',
+  },
+});
 
 export default StyleSelector;

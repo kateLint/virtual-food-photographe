@@ -1,12 +1,18 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { PhotoStyle } from '../types';
+import 'react-native-get-random-values';
+import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
+const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
+console.log('API Key loaded:', apiKey ? `${apiKey.substring(0, 15)}...` : 'NOT FOUND');
+
+if (!apiKey) {
+  throw new Error("EXPO_PUBLIC_GEMINI_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey });
 
 export async function parseMenu(menu: string): Promise<string[]> {
   try {
@@ -27,7 +33,7 @@ export async function parseMenu(menu: string): Promise<string[]> {
 
     const jsonString = response.text;
     const dishNames = JSON.parse(jsonString);
-    
+
     if (Array.isArray(dishNames) && dishNames.every(item => typeof item === 'string')) {
       return dishNames;
     } else {
@@ -58,21 +64,27 @@ export async function generateFoodImage(dishName: string, style: PhotoStyle): Pr
   const prompt = `Professional, ultra-realistic, high-end food photography of "${dishName}". ${styleDescription} The food should look delicious and appealing. Shot with a professional DSLR camera, magazine quality.`;
 
   try {
-    const response = await ai.models.generateImages({
-      model: 'imagen-4.0-generate-001',
-      prompt: prompt,
-      config: {
-        numberOfImages: 1,
-        outputMimeType: 'image/jpeg',
-        aspectRatio: '4:3',
-      },
+    // Using Pollinations.ai - free image generation API
+    const encodedPrompt = encodeURIComponent(prompt);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=600&nologo=true&enhance=true`;
+
+    console.log(`Generating image for "${dishName}"...`);
+
+    // Download and convert to base64 using expo-file-system
+    const fileUri = FileSystem.cacheDirectory + `${dishName.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+    const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+
+    if (downloadResult.status !== 200) {
+      throw new Error(`Image download failed: ${downloadResult.status}`);
+    }
+
+    // Read as base64
+    const base64 = await FileSystem.readAsStringAsync(downloadResult.uri, {
+      encoding: FileSystem.EncodingType.Base64,
     });
 
-    if (response.generatedImages && response.generatedImages.length > 0) {
-      return response.generatedImages[0].image.imageBytes;
-    } else {
-      throw new Error("API did not return any images.");
-    }
+    console.log(`Image generated successfully for "${dishName}"`);
+    return base64;
   } catch (error) {
     console.error(`Error generating image for "${dishName}":`, error);
     throw new Error(`Failed to generate an image for ${dishName}.`);
