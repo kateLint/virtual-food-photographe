@@ -1,41 +1,63 @@
-
 import React from 'react';
+import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import { Dish } from '../types';
 import LoaderIcon from './icons/LoaderIcon';
+import Svg, { Path } from 'react-native-svg';
 
 interface ImageCardProps {
   dish: Dish;
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({ dish }) => {
+  const spinValue = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (dish.status === 'generating' || dish.status === 'pending') {
+      Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      ).start();
+    }
+  }, [dish.status]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   const renderContent = () => {
     switch (dish.status) {
       case 'generating':
       case 'pending':
         return (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <div className="animate-spin">
-              <LoaderIcon className="w-10 h-10 text-amber-500" />
-            </div>
-            {dish.status === 'generating' && <p className="mt-2 text-sm">Generating...</p>}
-          </div>
+          <View style={styles.centerContent}>
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
+              <LoaderIcon width={40} height={40} color="#F59E0B" />
+            </Animated.View>
+            {dish.status === 'generating' && (
+              <Text style={styles.generatingText}>Generating...</Text>
+            )}
+          </View>
         );
       case 'completed':
         return (
-          <img
-            src={dish.imageUrl!}
-            alt={dish.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          <Image
+            source={{ uri: dish.imageUrl! }}
+            style={styles.image}
+            resizeMode="cover"
           />
         );
       case 'failed':
         return (
-          <div className="flex flex-col items-center justify-center h-full text-red-400 p-4 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm font-semibold">Image failed</p>
-          </div>
+          <View style={styles.centerContent}>
+            <Svg width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </Svg>
+            <Text style={styles.failedText}>Image failed</Text>
+          </View>
         );
       default:
         return null;
@@ -43,15 +65,59 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish }) => {
   };
 
   return (
-    <div className="group bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700 flex flex-col transition-all duration-300 hover:shadow-amber-500/20 hover:border-amber-500/50">
-      <div className="aspect-w-4 aspect-h-3 bg-gray-900 overflow-hidden">
+    <View style={styles.card}>
+      <View style={styles.imageContainer}>
         {renderContent()}
-      </div>
-      <div className="p-4 bg-gray-800">
-        <h3 className="text-lg font-semibold text-gray-100 truncate">{dish.name}</h3>
-      </div>
-    </div>
+      </View>
+      <View style={styles.footer}>
+        <Text style={styles.dishName} numberOfLines={1}>{dish.name}</Text>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#1F2937',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  imageContainer: {
+    aspectRatio: 4 / 3,
+    backgroundColor: '#111827',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  generatingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
+  failedText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  footer: {
+    padding: 16,
+    backgroundColor: '#1F2937',
+  },
+  dishName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#F3F4F6',
+  },
+});
 
 export default ImageCard;
