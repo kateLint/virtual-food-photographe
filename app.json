@@ -15,14 +15,23 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.virtualfoodphotographer.app",
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.png",
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save your favorite food photos."
+      }
     },
     "android": {
       "package": "com.virtualfoodphotographer.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111827"
-      }
+      },
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
     },
     "web": {
       "bundler": "metro",

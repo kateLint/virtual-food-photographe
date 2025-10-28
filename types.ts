@@ -10,4 +10,5 @@ export interface Dish {
   name: string;
   imageUrl: string | null;
   status: 'pending' | 'generating' | 'completed' | 'failed';
+  isFavorite?: boolean;
 }

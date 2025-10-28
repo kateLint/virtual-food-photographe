@@ -1,7 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PhotoStyle } from '../types';
 import 'react-native-get-random-values';
-import Constants from 'expo-constants';
 import * as FileSystem from 'expo-file-system';
 
 const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
