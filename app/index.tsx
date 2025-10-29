@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { Dish, PhotoStyle } from '../types';
-import { parseMenu, generateFoodImage } from '../services/geminiService';
+import { parseMenu, generateFoodImage, extractTextFromImage } from '../services/geminiService';
 import MenuInput from '../components/MenuInput';
 import StyleSelector from '../components/StyleSelector';
 import ImageGrid from '../components/ImageGrid';
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [selectedStyle, setSelectedStyle] = useState<PhotoStyle>(PhotoStyle.MODERN);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
 
   const handleGeneratePhotos = useCallback(async () => {
     if (!menuText.trim()) {
@@ -69,6 +71,76 @@ const App: React.FC = () => {
     }
   }, [menuText, selectedStyle]);
 
+  const handleCameraPress = useCallback(async () => {
+    try {
+      // Request camera permissions
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is required to scan menus.');
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      setIsScanning(true);
+
+      try {
+        // Extract text from the captured image
+        const extractedText = await extractTextFromImage(result.assets[0].uri);
+
+        // Append the extracted text to existing menu text
+        setMenuText(prevText => {
+          if (prevText.trim()) {
+            return `${prevText}\n\n${extractedText}`;
+          }
+          return extractedText;
+        });
+
+        Alert.alert('Success', 'Menu text extracted successfully!');
+      } catch (error) {
+        console.error('OCR Error:', error);
+        Alert.alert('Error', 'Failed to extract text from the image. Please try again or type the menu manually.');
+      } finally {
+        setIsScanning(false);
+      }
+    } catch (error) {
+      console.error('Camera Error:', error);
+      Alert.alert('Error', 'Failed to open camera. Please try again.');
+      setIsScanning(false);
+    }
+  }, []);
+
+  const handleClearMenu = useCallback(() => {
+    Alert.alert(
+      'Clear Menu',
+      'Are you sure you want to clear the menu text?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Clear',
+          style: 'destructive',
+          onPress: () => {
+            setMenuText('');
+            setDishes([]);
+          }
+        }
+      ]
+    );
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -88,25 +160,31 @@ const App: React.FC = () => {
         </View>
 
         <View style={styles.mainCard}>
-          <MenuInput value={menuText} onChange={setMenuText} />
+          <MenuInput
+            value={menuText}
+            onChange={setMenuText}
+            onCameraPress={handleCameraPress}
+            onClearPress={handleClearMenu}
+            isScanning={isScanning}
+          />
           <View style={styles.divider} />
           <StyleSelector selectedStyle={selectedStyle} onChange={setSelectedStyle} />
 
           <TouchableOpacity
             onPress={handleGeneratePhotos}
-            disabled={isLoading}
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            disabled={isLoading || isScanning}
+            style={[styles.button, (isLoading || isScanning) && styles.buttonDisabled]}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={isLoading ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
+              colors={(isLoading || isScanning) ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
               locations={[0, 1]}
               style={styles.buttonGradient}
             >
               <Text style={styles.buttonText}>
-                {isLoading ? 'Generating...' : 'Generate Photos'}
+                {isScanning ? 'Scanning Menu...' : isLoading ? 'Generating...' : 'Generate Photos'}
               </Text>
               <SparklesIcon width={24} height={24} color="#FFFFFF" />
             </LinearGradient>

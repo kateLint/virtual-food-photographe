@@ -39,9 +39,26 @@ export async function parseMenu(menu: string): Promise<string[]> {
       throw new Error("Parsed menu is not a string array.");
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error parsing menu with Gemini:", error);
-    throw new Error("Failed to parse menu. The AI could not understand the format.");
+
+    // Get error details from various possible error structures
+    const errorMsg = error?.message || '';
+    const errorStatus = error?.status || error?.error?.status || '';
+    const errorCode = error?.code || error?.error?.code || 0;
+
+    // Check for specific error types and provide user-friendly messages
+    if (errorCode === 503 || errorStatus === 'UNAVAILABLE' || errorMsg.includes('503') || errorMsg.includes('overloaded') || errorMsg.includes('UNAVAILABLE')) {
+      throw new Error("The AI service is currently overloaded. Please wait a moment and try again.");
+    } else if (errorCode === 429 || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error("Too many requests. Please wait a minute and try again.");
+    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR')) {
+      throw new Error("Network error. Please check your internet connection and try again.");
+    } else if (errorCode === 400 || errorStatus === 'INVALID_ARGUMENT' || errorMsg.includes('400') || errorMsg.includes('INVALID_ARGUMENT')) {
+      throw new Error("Invalid menu format. Please check your menu text and try again.");
+    } else {
+      throw new Error("Failed to parse menu. Please try again or contact support if the issue persists.");
+    }
   }
 }
 
@@ -57,6 +74,62 @@ const getStylePrompt = (style: PhotoStyle): string => {
       return "A standard, high-quality food photograph.";
   }
 };
+
+export async function extractTextFromImage(imageUri: string): Promise<string> {
+  try {
+    console.log('Extracting text from menu image...');
+
+    // Read the image as base64
+    const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    // Use Gemini's multimodal capabilities to extract text
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType: "image/jpeg",
+                data: base64Image
+              }
+            },
+            {
+              text: "Extract all the text from this menu image. Return only the text content, preserving the structure and layout as much as possible. Include dish names, descriptions, and any other text visible in the menu."
+            }
+          ]
+        }
+      ]
+    });
+
+    const extractedText = response.text;
+    console.log('Text extracted successfully from image');
+    return extractedText;
+  } catch (error: any) {
+    console.error("Error extracting text from image:", error);
+
+    // Get error details from various possible error structures
+    const errorMsg = error?.message || '';
+    const errorStatus = error?.status || error?.error?.status || '';
+    const errorCode = error?.code || error?.error?.code || 0;
+
+    // Check for specific error types and provide user-friendly messages
+    if (errorCode === 503 || errorStatus === 'UNAVAILABLE' || errorMsg.includes('503') || errorMsg.includes('overloaded') || errorMsg.includes('UNAVAILABLE')) {
+      throw new Error("The AI service is currently overloaded. Please wait a moment and try scanning again.");
+    } else if (errorCode === 429 || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error("Too many requests. Please wait a minute and try again.");
+    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR')) {
+      throw new Error("Network error. Please check your internet connection and try again.");
+    } else if (errorCode === 400 || errorStatus === 'INVALID_ARGUMENT' || errorMsg.includes('400') || errorMsg.includes('INVALID_ARGUMENT')) {
+      throw new Error("Could not process the image. Please try taking another photo.");
+    } else {
+      throw new Error("Failed to extract text from the menu image. Please try again or type the menu manually.");
+    }
+  }
+}
 
 export async function generateFoodImage(dishName: string, style: PhotoStyle): Promise<string> {
   const styleDescription = getStylePrompt(style);

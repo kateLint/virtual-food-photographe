@@ -18,7 +18,8 @@
       "icon": "./assets/icon.png",
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
-        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save your favorite food photos."
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
+        "NSCameraUsageDescription": "This app needs access to your camera to scan menu photos and extract text."
       }
     },
     "android": {
@@ -30,7 +31,8 @@
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_IMAGES"
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -40,6 +42,7 @@
     "plugins": [
       "expo-router"
     ],
+    "newArchEnabled": true,
     "extra": {
       "router": {
         "origin": false

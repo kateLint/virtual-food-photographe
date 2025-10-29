@@ -1,22 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Share, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Share, Alert, ActivityIndicator } from 'react-native';
 import { useFavorites } from '../contexts/FavoritesContext';
 import ImageCard from '../components/ImageCard';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+import * as Haptics from 'expo-haptics';
 import Svg, { Path } from 'react-native-svg';
 
 const FavoritesScreen: React.FC = () => {
   const { favorites } = useFavorites();
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
+  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
 
-  const handleDownload = async (imageUrl: string, dishName: string) => {
+  const handleDownload = async (imageUrl: string, dishName: string, dishId: string, showAlert = true) => {
     try {
+      // Add to downloading set
+      setDownloadingIds(prev => new Set(prev).add(dishId));
+
       if (permissionResponse?.status !== 'granted') {
         const permission = await requestPermission();
         if (!permission.granted) {
+          setDownloadingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(dishId);
+            return newSet;
+          });
           Alert.alert('Permission Required', 'Please grant permission to save photos to your library.');
-          return;
+          return false;
         }
       }
 
@@ -32,10 +44,69 @@ const FavoritesScreen: React.FC = () => {
       const asset = await MediaLibrary.createAssetAsync(fileUri);
       await MediaLibrary.createAlbumAsync('VirtualFoodPhotographer', asset, false);
 
-      Alert.alert('Success', 'Image saved to your photo library!');
+      // Haptic feedback on success
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      // Remove from downloading set
+      setDownloadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(dishId);
+        return newSet;
+      });
+
+      if (showAlert) {
+        Alert.alert('Success', 'Image saved to your photo library!');
+      }
+      return true;
     } catch (error) {
       console.error('Error saving image:', error);
-      Alert.alert('Error', 'Failed to save image. Please try again.');
+
+      // Remove from downloading set
+      setDownloadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(dishId);
+        return newSet;
+      });
+
+      if (showAlert) {
+        Alert.alert('Error', 'Failed to save image. Please try again.');
+      }
+      return false;
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    if (favorites.length === 0 || isDownloadingAll) return;
+
+    setIsDownloadingAll(true);
+    setDownloadProgress({ current: 0, total: favorites.length });
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < favorites.length; i++) {
+      const dish = favorites[i];
+      setDownloadProgress({ current: i + 1, total: favorites.length });
+
+      const success = await handleDownload(dish.imageUrl!, dish.name, dish.id, false);
+      if (success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    }
+
+    setIsDownloadingAll(false);
+    setDownloadProgress({ current: 0, total: 0 });
+
+    // Show summary
+    if (failCount === 0) {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Success', `All ${successCount} images saved to your photo library!`);
+    } else if (successCount === 0) {
+      Alert.alert('Error', 'Failed to download images. Please try again.');
+    } else {
+      Alert.alert('Partial Success', `${successCount} images saved, ${failCount} failed. Please try again for failed images.`);
     }
   };
 
@@ -68,6 +139,30 @@ const FavoritesScreen: React.FC = () => {
           <Text style={styles.subtitle}>
             {favorites.length} {favorites.length === 1 ? 'photo' : 'photos'} saved
           </Text>
+          {favorites.length > 0 && (
+            <TouchableOpacity
+              style={[styles.downloadAllButton, isDownloadingAll && styles.downloadAllButtonDisabled]}
+              onPress={handleDownloadAll}
+              disabled={isDownloadingAll}
+              activeOpacity={0.7}
+            >
+              {isDownloadingAll ? (
+                <>
+                  <ActivityIndicator size="small" color="#111827" />
+                  <Text style={styles.downloadAllText}>
+                    Downloading {downloadProgress.current}/{downloadProgress.total}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                  </Svg>
+                  <Text style={styles.downloadAllText}>Download All</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
 
         {favorites.length === 0 ? (
@@ -87,14 +182,24 @@ const FavoritesScreen: React.FC = () => {
                       <ImageCard dish={dish} />
                       <View style={styles.actionButtons}>
                         <TouchableOpacity
-                          style={styles.actionButton}
-                          onPress={() => handleDownload(dish.imageUrl!, dish.name)}
+                          style={[styles.actionButton, downloadingIds.has(dish.id) && styles.actionButtonDisabled]}
+                          onPress={() => handleDownload(dish.imageUrl!, dish.name, dish.id)}
+                          disabled={downloadingIds.has(dish.id)}
                           activeOpacity={0.7}
                         >
-                          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                          </Svg>
-                          <Text style={styles.actionText}>Download</Text>
+                          {downloadingIds.has(dish.id) ? (
+                            <>
+                              <ActivityIndicator size="small" color="#F59E0B" />
+                              <Text style={styles.actionText}>Saving...</Text>
+                            </>
+                          ) : (
+                            <>
+                              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                              </Svg>
+                              <Text style={styles.actionText}>Download</Text>
+                            </>
+                          )}
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.actionButton}
@@ -113,14 +218,24 @@ const FavoritesScreen: React.FC = () => {
                         <ImageCard dish={favorites[index + 1]} />
                         <View style={styles.actionButtons}>
                           <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleDownload(favorites[index + 1].imageUrl!, favorites[index + 1].name)}
+                            style={[styles.actionButton, downloadingIds.has(favorites[index + 1].id) && styles.actionButtonDisabled]}
+                            onPress={() => handleDownload(favorites[index + 1].imageUrl!, favorites[index + 1].name, favorites[index + 1].id)}
+                            disabled={downloadingIds.has(favorites[index + 1].id)}
                             activeOpacity={0.7}
                           >
-                            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                            </Svg>
-                            <Text style={styles.actionText}>Download</Text>
+                            {downloadingIds.has(favorites[index + 1].id) ? (
+                              <>
+                                <ActivityIndicator size="small" color="#F59E0B" />
+                                <Text style={styles.actionText}>Saving...</Text>
+                              </>
+                            ) : (
+                              <>
+                                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                </Svg>
+                                <Text style={styles.actionText}>Download</Text>
+                              </>
+                            )}
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={styles.actionButton}
@@ -232,6 +347,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#F59E0B',
+  },
+  actionButtonDisabled: {
+    opacity: 0.5,
+  },
+  downloadAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F59E0B',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+    gap: 8,
+  },
+  downloadAllButtonDisabled: {
+    opacity: 0.7,
+  },
+  downloadAllText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
   },
 });
 
