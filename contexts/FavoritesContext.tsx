@@ -32,23 +32,30 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const saveFavorites = async (newFavorites: Dish[]) => {
+  const saveFavoritesToStorage = async (newFavorites: Dish[]) => {
     try {
+      console.log(`[FavoritesContext] Saving ${newFavorites.length} favorites to storage`);
       await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(newFavorites));
-      setFavorites(newFavorites);
+      console.log(`[FavoritesContext] Favorites saved to storage`);
     } catch (error) {
       console.error('Error saving favorites:', error);
     }
   };
 
   const addFavorite = async (dish: Dish) => {
-    const newFavorites = [...favorites, { ...dish, isFavorite: true }];
-    await saveFavorites(newFavorites);
+    setFavorites(prevFavorites => {
+      const newFavorites = [...prevFavorites, dish];
+      saveFavoritesToStorage(newFavorites);
+      return newFavorites;
+    });
   };
 
   const removeFavorite = async (dishId: string) => {
-    const newFavorites = favorites.filter(fav => fav.id !== dishId);
-    await saveFavorites(newFavorites);
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.filter(fav => fav.id !== dishId);
+      saveFavoritesToStorage(newFavorites);
+      return newFavorites;
+    });
   };
 
   const isFavorite = (dishId: string) => {
@@ -56,11 +63,25 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const toggleFavorite = async (dish: Dish) => {
-    if (isFavorite(dish.id)) {
-      await removeFavorite(dish.id);
-    } else {
-      await addFavorite(dish);
-    }
+    console.log(`[FavoritesContext] Toggle favorite for: ${dish.name}, ID: ${dish.id}`);
+
+    setFavorites(prevFavorites => {
+      const isCurrentlyFavorite = prevFavorites.some(fav => fav.id === dish.id);
+      console.log(`[FavoritesContext] Current favorites count: ${prevFavorites.length}`);
+      console.log(`[FavoritesContext] Is currently favorite: ${isCurrentlyFavorite}`);
+
+      let newFavorites: Dish[];
+      if (isCurrentlyFavorite) {
+        console.log(`[FavoritesContext] Removing from favorites`);
+        newFavorites = prevFavorites.filter(fav => fav.id !== dish.id);
+      } else {
+        console.log(`[FavoritesContext] Adding to favorites`);
+        newFavorites = [...prevFavorites, dish];
+      }
+
+      saveFavoritesToStorage(newFavorites);
+      return newFavorites;
+    });
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Share, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useFavorites } from '../contexts/FavoritesContext';
 import ImageCard from '../components/ImageCard';
 import * as MediaLibrary from 'expo-media-library';
@@ -110,26 +110,6 @@ const FavoritesScreen: React.FC = () => {
     }
   };
 
-  const handleShare = async (imageUrl: string, dishName: string) => {
-    try {
-      // Create a temporary file
-      const fileUri = FileSystem.cacheDirectory + `${dishName.replace(/\s+/g, '_')}.jpg`;
-
-      // Write base64 to file
-      await FileSystem.writeAsStringAsync(fileUri, imageUrl.split(',')[1], {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      // Share the file
-      await Share.share({
-        url: fileUri,
-        message: `Check out this ${dishName} photo!`,
-      });
-    } catch (error) {
-      console.error('Error sharing image:', error);
-      Alert.alert('Error', 'Failed to share image. Please try again.');
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -180,74 +160,50 @@ const FavoritesScreen: React.FC = () => {
                   <View key={dish.id} style={styles.row}>
                     <View style={styles.cardWrapper}>
                       <ImageCard dish={dish} />
-                      <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                          style={[styles.actionButton, downloadingIds.has(dish.id) && styles.actionButtonDisabled]}
-                          onPress={() => handleDownload(dish.imageUrl!, dish.name, dish.id)}
-                          disabled={downloadingIds.has(dish.id)}
-                          activeOpacity={0.7}
-                        >
-                          {downloadingIds.has(dish.id) ? (
-                            <>
-                              <ActivityIndicator size="small" color="#F59E0B" />
-                              <Text style={styles.actionText}>Saving...</Text>
-                            </>
-                          ) : (
-                            <>
-                              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                              </Svg>
-                              <Text style={styles.actionText}>Download</Text>
-                            </>
-                          )}
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.actionButton}
-                          onPress={() => handleShare(dish.imageUrl!, dish.name)}
-                          activeOpacity={0.7}
-                        >
-                          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
-                          </Svg>
-                          <Text style={styles.actionText}>Share</Text>
-                        </TouchableOpacity>
-                      </View>
+                      <TouchableOpacity
+                        style={[styles.downloadButton, downloadingIds.has(dish.id) && styles.downloadButtonDisabled]}
+                        onPress={() => handleDownload(dish.imageUrl!, dish.name, dish.id)}
+                        disabled={downloadingIds.has(dish.id)}
+                        activeOpacity={0.7}
+                      >
+                        {downloadingIds.has(dish.id) ? (
+                          <>
+                            <ActivityIndicator size="small" color="#111827" />
+                            <Text style={styles.downloadButtonText}>Downloading...</Text>
+                          </>
+                        ) : (
+                          <>
+                            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                            </Svg>
+                            <Text style={styles.downloadButtonText}>Download</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
                     </View>
                     {favorites[index + 1] && (
                       <View style={styles.cardWrapper}>
                         <ImageCard dish={favorites[index + 1]} />
-                        <View style={styles.actionButtons}>
-                          <TouchableOpacity
-                            style={[styles.actionButton, downloadingIds.has(favorites[index + 1].id) && styles.actionButtonDisabled]}
-                            onPress={() => handleDownload(favorites[index + 1].imageUrl!, favorites[index + 1].name, favorites[index + 1].id)}
-                            disabled={downloadingIds.has(favorites[index + 1].id)}
-                            activeOpacity={0.7}
-                          >
-                            {downloadingIds.has(favorites[index + 1].id) ? (
-                              <>
-                                <ActivityIndicator size="small" color="#F59E0B" />
-                                <Text style={styles.actionText}>Saving...</Text>
-                              </>
-                            ) : (
-                              <>
-                                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                                </Svg>
-                                <Text style={styles.actionText}>Download</Text>
-                              </>
-                            )}
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleShare(favorites[index + 1].imageUrl!, favorites[index + 1].name)}
-                            activeOpacity={0.7}
-                          >
-                            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
-                            </Svg>
-                            <Text style={styles.actionText}>Share</Text>
-                          </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                          style={[styles.downloadButton, downloadingIds.has(favorites[index + 1].id) && styles.downloadButtonDisabled]}
+                          onPress={() => handleDownload(favorites[index + 1].imageUrl!, favorites[index + 1].name, favorites[index + 1].id)}
+                          disabled={downloadingIds.has(favorites[index + 1].id)}
+                          activeOpacity={0.7}
+                        >
+                          {downloadingIds.has(favorites[index + 1].id) ? (
+                            <>
+                              <ActivityIndicator size="small" color="#111827" />
+                              <Text style={styles.downloadButtonText}>Downloading...</Text>
+                            </>
+                          ) : (
+                            <>
+                              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                              </Svg>
+                              <Text style={styles.downloadButtonText}>Download</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
                       </View>
                     )}
                   </View>
@@ -325,31 +281,23 @@ const styles = StyleSheet.create({
   cardWrapper: {
     flex: 1,
   },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 8,
-    gap: 8,
-  },
-  actionButton: {
-    flex: 1,
+  downloadButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: '#F59E0B',
     borderRadius: 8,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#374151',
+    marginTop: 8,
     gap: 6,
   },
-  actionText: {
+  downloadButtonDisabled: {
+    opacity: 0.5,
+  },
+  downloadButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#F59E0B',
-  },
-  actionButtonDisabled: {
-    opacity: 0.5,
+    color: '#111827',
   },
   downloadAllButton: {
     flexDirection: 'row',

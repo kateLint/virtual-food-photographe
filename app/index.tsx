@@ -47,21 +47,24 @@ const App: React.FC = () => {
         id: generateUUID(),
         name,
         imageUrl: null,
-        status: 'pending'
+        status: 'generating'
       }));
       setDishes(initialDishes);
+      setIsLoading(false);
 
-      for (const dish of initialDishes) {
-        setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'generating' } : d));
-        try {
-          const base64Image = await generateFoodImage(dish.name, selectedStyle);
-          const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-          setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'completed', imageUrl } : d));
-        } catch (e) {
-          console.error(`Failed to generate image for ${dish.name}:`, e);
-          setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'failed' } : d));
-        }
-      }
+      // Generate all images in parallel
+      await Promise.all(
+        initialDishes.map(async (dish) => {
+          try {
+            const base64Image = await generateFoodImage(dish.name, selectedStyle);
+            const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+            setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'completed', imageUrl } : d));
+          } catch (e) {
+            console.error(`Failed to generate image for ${dish.name}:`, e);
+            setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'failed' } : d));
+          }
+        })
+      );
 
     } catch (err) {
       console.error(err);
@@ -141,6 +144,23 @@ const App: React.FC = () => {
     );
   }, []);
 
+  const handleRetryDish = useCallback(async (dishId: string) => {
+    const dish = dishes.find(d => d.id === dishId);
+    if (!dish) return;
+
+    // Set status to generating
+    setDishes(prev => prev.map(d => d.id === dishId ? { ...d, status: 'generating', imageUrl: null } : d));
+
+    try {
+      const base64Image = await generateFoodImage(dish.name, selectedStyle);
+      const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+      setDishes(prev => prev.map(d => d.id === dishId ? { ...d, status: 'completed', imageUrl } : d));
+    } catch (e) {
+      console.error(`Failed to generate image for ${dish.name}:`, e);
+      setDishes(prev => prev.map(d => d.id === dishId ? { ...d, status: 'failed' } : d));
+    }
+  }, [dishes, selectedStyle]);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -172,19 +192,19 @@ const App: React.FC = () => {
 
           <TouchableOpacity
             onPress={handleGeneratePhotos}
-            disabled={isLoading || isScanning}
-            style={[styles.button, (isLoading || isScanning) && styles.buttonDisabled]}
+            disabled={isScanning}
+            style={[styles.button, isScanning && styles.buttonDisabled]}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={(isLoading || isScanning) ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
+              colors={isScanning ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
               locations={[0, 1]}
               style={styles.buttonGradient}
             >
               <Text style={styles.buttonText}>
-                {isScanning ? 'Scanning Menu...' : isLoading ? 'Generating...' : 'Generate Photos'}
+                {isScanning ? 'Scanning Menu...' : 'Generate Photos'}
               </Text>
               <SparklesIcon width={24} height={24} color="#FFFFFF" />
             </LinearGradient>
@@ -192,7 +212,7 @@ const App: React.FC = () => {
         </View>
 
         <View style={styles.resultsSection}>
-          <ImageGrid dishes={dishes} isLoading={isLoading} />
+          <ImageGrid dishes={dishes} isLoading={isLoading} onRetryDish={handleRetryDish} />
         </View>
       </ScrollView>
     </SafeAreaView>

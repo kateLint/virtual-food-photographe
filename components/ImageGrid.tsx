@@ -7,15 +7,15 @@ import LoaderIcon from './icons/LoaderIcon';
 interface ImageGridProps {
   dishes: Dish[];
   isLoading: boolean;
+  onRetryDish?: (dishId: string) => void;
 }
 
-const ImageGrid: React.FC<ImageGridProps> = ({ dishes, isLoading }) => {
+const ImageGrid: React.FC<ImageGridProps> = ({ dishes, isLoading, onRetryDish }) => {
   const spinValue = React.useRef(new Animated.Value(0)).current;
-  const hasPendingOrGenerating = dishes.some(d => d.status === 'pending' || d.status === 'generating');
   const showGrid = dishes.length > 0;
 
   React.useEffect(() => {
-    if (isLoading || hasPendingOrGenerating) {
+    if (isLoading) {
       Animated.loop(
         Animated.timing(spinValue, {
           toValue: 1,
@@ -24,7 +24,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({ dishes, isLoading }) => {
         })
       ).start();
     }
-  }, [isLoading, hasPendingOrGenerating]);
+  }, [isLoading]);
 
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
@@ -52,25 +52,17 @@ const ImageGrid: React.FC<ImageGridProps> = ({ dishes, isLoading }) => {
 
   return (
     <View>
-      {hasPendingOrGenerating && (
-        <View style={styles.generatingHeader}>
-          <Animated.View style={{ transform: [{ rotate: spin }], marginRight: 12 }}>
-            <LoaderIcon width={24} height={24} color="#F59E0B" />
-          </Animated.View>
-          <Text style={styles.generatingText}>Generating images... This may take a moment.</Text>
-        </View>
-      )}
       <View style={styles.grid}>
         {dishes.reduce<React.ReactNode[]>((rows, dish, index) => {
           if (index % 2 === 0) {
             rows.push(
               <View key={dish.id} style={styles.row}>
                 <View style={styles.cardWrapper}>
-                  <ImageCard dish={dish} />
+                  <ImageCard dish={dish} onRetry={onRetryDish} />
                 </View>
                 {dishes[index + 1] && (
                   <View style={styles.cardWrapper}>
-                    <ImageCard dish={dishes[index + 1]} />
+                    <ImageCard dish={dishes[index + 1]} onRetry={onRetryDish} />
                   </View>
                 )}
               </View>
@@ -108,16 +100,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     paddingHorizontal: 20,
-  },
-  generatingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  generatingText: {
-    fontSize: 18,
-    color: '#9CA3AF',
   },
   grid: {
     paddingBottom: 20,
