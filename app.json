@@ -31,7 +31,7 @@
     "android": {
       "package": "com.virtualfoodphotographer.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#111827"
       },
       "splash": {
@@ -55,6 +55,7 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash.png",
           "resizeMode": "cover",
           "backgroundColor": "#111827"
         }
@@ -66,8 +67,8 @@
       },
       "eas": {
         "projectId": "your-project-id"
-      },
-      "supportsRTL": false
-    }
+      }
+    },
+    "supportsRTL": false
   }
 }

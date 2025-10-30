@@ -314,7 +314,7 @@ eas build --platform ios
 The app requires the following assets in the `assets/` directory:
 - icon.png (1024x1024) - App icon
 - splash.png (1284x2778) - Splash screen
-- adaptive-icon.png (1024x1024) - Android adaptive icon
+- icon.png (1024x1024) - Android adaptive icon
 - favicon.png - Web favicon (optional)
 
 See `assets/README.md` for details.
