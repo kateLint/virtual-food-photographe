@@ -9,6 +9,11 @@
 {
   self.moduleName = @"main";
 
+  // Force LTR layout direction
+  if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:UISemanticContentAttributeUnspecified] == UIUserInterfaceLayoutDirectionRightToLeft) {
+    [[UIView appearance] setSemanticContentAttribute:UISemanticContentAttributeForceLeftToRight];
+  }
+
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};

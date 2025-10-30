@@ -9,13 +9,19 @@
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#111827"
     },
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.virtualfoodphotographer.app",
       "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#111827"
+      },
       "infoPlist": {
         "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
@@ -26,6 +32,11 @@
       "package": "com.virtualfoodphotographer.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111827"
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "cover",
         "backgroundColor": "#111827"
       },
       "permissions": [
@@ -42,14 +53,14 @@
     "plugins": [
       "expo-router"
     ],
-    "newArchEnabled": true,
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
         "projectId": "your-project-id"
-      }
+      },
+      "supportsRTL": false
     }
   }
 }

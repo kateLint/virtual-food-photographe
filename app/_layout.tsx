@@ -2,11 +2,15 @@ import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nManager } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
 import { ToastProvider } from '../contexts/ToastContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import Svg, { Path } from 'react-native-svg';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 // Force LTR layout
 if (I18nManager.isRTL) {
@@ -32,11 +36,41 @@ function HeartIcon({ color }: { color: string }) {
 }
 
 export default function RootLayout() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Pre-load any resources or data here
+        // Minimal delay for smooth transition
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      // This tells the splash screen to hide immediately
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
     <ErrorBoundary>
       <ToastProvider>
         <FavoritesProvider>
-          <SafeAreaProvider>
+          <SafeAreaProvider onLayout={onLayoutRootView}>
             <StatusBar style="light" />
             <Tabs
             screenOptions={{
