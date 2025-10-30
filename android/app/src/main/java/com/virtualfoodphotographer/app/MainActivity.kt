@@ -3,9 +3,6 @@ import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
 import android.os.Bundle
-import androidx.core.text.TextUtilsCompat
-import androidx.core.view.ViewCompat
-import java.util.Locale
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -16,9 +13,6 @@ import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
-    // Force LTR layout direction
-    window.decorView.layoutDirection = ViewCompat.LAYOUT_DIRECTION_LTR
-
     // Set the theme to AppTheme BEFORE onCreate to support
     // coloring the background, status bar, and navigation bar.
     // This is required for expo-splash-screen.
