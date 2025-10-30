@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useFavorites } from '../contexts/FavoritesContext';
 import ImageCard from '../components/ImageCard';
+import Toast from '../components/Toast';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +14,11 @@ const FavoritesScreen: React.FC = () => {
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
 
   const handleDownload = async (imageUrl: string, dishName: string, dishId: string, showAlert = true) => {
     try {
@@ -27,7 +33,7 @@ const FavoritesScreen: React.FC = () => {
             newSet.delete(dishId);
             return newSet;
           });
-          Alert.alert('Permission Required', 'Please grant permission to save photos to your library.');
+          Alert.alert('Permission Required', 'Please grant permission to save photos to your library.', [{ text: 'OK', style: 'default' }]);
           return false;
         }
       }
@@ -55,7 +61,7 @@ const FavoritesScreen: React.FC = () => {
       });
 
       if (showAlert) {
-        Alert.alert('Success', 'Image saved to your photo library!');
+        setToast({ visible: true, message: 'Image saved to your photo library!', type: 'success' });
       }
       return true;
     } catch (error) {
@@ -69,7 +75,7 @@ const FavoritesScreen: React.FC = () => {
       });
 
       if (showAlert) {
-        Alert.alert('Error', 'Failed to save image. Please try again.');
+        setToast({ visible: true, message: 'Failed to save image. Please try again.', type: 'error' });
       }
       return false;
     }
@@ -102,17 +108,23 @@ const FavoritesScreen: React.FC = () => {
     // Show summary
     if (failCount === 0) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Success', `All ${successCount} images saved to your photo library!`);
+      setToast({ visible: true, message: `All ${successCount} images saved successfully!`, type: 'success' });
     } else if (successCount === 0) {
-      Alert.alert('Error', 'Failed to download images. Please try again.');
+      setToast({ visible: true, message: 'Failed to download images. Please try again.', type: 'error' });
     } else {
-      Alert.alert('Partial Success', `${successCount} images saved, ${failCount} failed. Please try again for failed images.`);
+      setToast({ visible: true, message: `${successCount} saved, ${failCount} failed`, type: 'info' });
     }
   };
 
 
   return (
     <SafeAreaView style={styles.container}>
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHide={() => setToast({ ...toast, visible: false })}
+      />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>My Favorites</Text>

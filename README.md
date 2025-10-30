@@ -154,7 +154,7 @@ npx expo run:ios --configuration Release
 ### API errors
 - Verify your Gemini API key is valid
 - Check your internet connection
-- Ensure the API key is set in the `.env` file with the `EXPO_PUBLIC_` prefix
+- Ensure the API key is set18 in the `.env` file with the `EXPO_PUBLIC_` prefix
 
 ### Build errors
 - Make sure you have the latest version of Expo CLI

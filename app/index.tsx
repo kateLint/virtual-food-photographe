@@ -25,21 +25,27 @@ const App: React.FC = () => {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleGeneratePhotos = useCallback(async () => {
     if (!menuText.trim()) {
-      Alert.alert('Error', 'Please enter a menu.');
+      setErrorMessage('Please enter a menu.');
       return;
     }
 
+    setErrorMessage('');
     setIsLoading(true);
     setDishes([]);
+  // Disable the generate button until the first image (success or failure) completes
+  setIsButtonDisabled(true);
 
     try {
       const dishNames = await parseMenu(menuText);
       if (!dishNames || dishNames.length === 0) {
-        Alert.alert('Error', 'Could not find any dishes in the menu. Please check the format.');
+        setErrorMessage('Could not find any dishes in the menu. Please check the format.');
         setIsLoading(false);
+        setIsButtonDisabled(false);
         return;
       }
 
@@ -52,23 +58,41 @@ const App: React.FC = () => {
       setDishes(initialDishes);
       setIsLoading(false);
 
-      // Generate all images in parallel
-      await Promise.all(
-        initialDishes.map(async (dish) => {
-          try {
-            const base64Image = await generateFoodImage(dish.name, selectedStyle);
-            const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-            setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'completed', imageUrl } : d));
-          } catch (e) {
-            console.error(`Failed to generate image for ${dish.name}:`, e);
-            setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'failed' } : d));
-          }
-        })
-      );
+      // Start generating images in parallel. We'll use Promise.race on the same
+      // promises to detect the first completion (success or failure) so we can
+      // re-enable the button as requested.
+      const generationPromises = initialDishes.map(async (dish) => {
+        try {
+          const base64Image = await generateFoodImage(dish.name, selectedStyle);
+          const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+          setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'completed', imageUrl } : d));
+          return { id: dish.id, ok: true } as const;
+        } catch (e) {
+          console.error(`Failed to generate image for ${dish.name}:`, e);
+          setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'failed' } : d));
+          return { id: dish.id, ok: false } as const;
+        }
+      });
 
-    } catch (err) {
+      // Wait for the first promise to settle (either success or failure), then
+      // re-enable the button. Promise.race will resolve when the first of the
+      // provided promises resolves; since each generation promise always
+      // resolves (we return an object in both try and catch), this works.
+      try {
+        await Promise.race(generationPromises);
+      } catch (_) {
+        // Not expected because the mapped promises resolve, but keep guard.
+      } finally {
+        setIsButtonDisabled(false);
+      }
+
+      // Wait for all to finish before moving on.
+      await Promise.all(generationPromises);
+
+    } catch (err: any) {
       console.error(err);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      setErrorMessage(err?.message || 'An unexpected error occurred. Please try again.');
+      setIsButtonDisabled(false);
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +104,7 @@ const App: React.FC = () => {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Camera permission is required to scan menus.');
+        setErrorMessage('Camera permission is required to scan menus.');
         return;
       }
 
@@ -109,16 +133,16 @@ const App: React.FC = () => {
           return extractedText;
         });
 
-        Alert.alert('Success', 'Menu text extracted successfully!');
-      } catch (error) {
+        // Success - no need to show a message, the text will appear in the input
+      } catch (error: any) {
         console.error('OCR Error:', error);
-        Alert.alert('Error', 'Failed to extract text from the image. Please try again or type the menu manually.');
+        setErrorMessage(error?.message || 'Failed to extract text from the image. Please try again or type the menu manually.');
       } finally {
         setIsScanning(false);
       }
     } catch (error) {
       console.error('Camera Error:', error);
-      Alert.alert('Error', 'Failed to open camera. Please try again.');
+      setErrorMessage('Failed to open camera. Please try again.');
       setIsScanning(false);
     }
   }, []);
@@ -179,10 +203,24 @@ const App: React.FC = () => {
           </Text>
         </View>
 
+        {errorMessage ? (
+          <View style={styles.errorBanner}>
+            <View style={styles.errorContent}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+              <TouchableOpacity onPress={() => setErrorMessage('')} style={styles.errorDismiss}>
+                <Text style={styles.errorDismissText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
+
         <View style={styles.mainCard}>
           <MenuInput
             value={menuText}
-            onChange={setMenuText}
+            onChange={(text) => {
+              setMenuText(text);
+              if (errorMessage) setErrorMessage('');
+            }}
             onCameraPress={handleCameraPress}
             onClearPress={handleClearMenu}
             isScanning={isScanning}
@@ -192,19 +230,19 @@ const App: React.FC = () => {
 
           <TouchableOpacity
             onPress={handleGeneratePhotos}
-            disabled={isScanning}
-            style={[styles.button, isScanning && styles.buttonDisabled]}
+            disabled={isScanning || isButtonDisabled}
+            style={[styles.button, (isScanning || isButtonDisabled) && styles.buttonDisabled]}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={isScanning ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
+              colors={(isScanning || isButtonDisabled) ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
               locations={[0, 1]}
               style={styles.buttonGradient}
             >
               <Text style={styles.buttonText}>
-                {isScanning ? 'Scanning Menu...' : 'Generate Photos'}
+                {isScanning ? 'Scanning Menu...' : (isButtonDisabled ? 'Generating...' : 'Generate Photos')}
               </Text>
               <SparklesIcon width={24} height={24} color="#FFFFFF" />
             </LinearGradient>
@@ -234,6 +272,34 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 32,
+  },
+  errorBanner: {
+    backgroundColor: '#7F1D1D',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#991B1B',
+  },
+  errorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  errorText: {
+    color: '#FEE2E2',
+    fontSize: 14,
+    flex: 1,
+    marginRight: 12,
+  },
+  errorDismiss: {
+    padding: 4,
+    borderRadius: 4,
+  },
+  errorDismissText: {
+    color: '#FEE2E2',
+    fontSize: 20,
+    fontWeight: '600',
   },
   titleGradient: {
     paddingHorizontal: 20,

@@ -23,6 +23,15 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
     return isFav;
   }, [favorites, dish.id, dish.name]);
 
+  const handleToggleFavorite = async () => {
+    console.log(`[ImageCard] ===== FAVORITE BUTTON PRESSED =====`);
+    console.log(`[ImageCard] Dish: ${dish.name}, ID: ${dish.id}`);
+    console.log(`[ImageCard] Current state - isCurrentlyFavorite: ${isCurrentlyFavorite}`);
+    console.log(`[ImageCard] About to call toggleFavorite...`);
+    await toggleFavorite(dish);
+    console.log(`[ImageCard] toggleFavorite completed`);
+  };
+
   React.useEffect(() => {
     if (dish.status === 'generating' || dish.status === 'pending') {
       Animated.loop(
@@ -83,7 +92,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
             />
             <TouchableOpacity
               style={styles.favoriteButton}
-              onPress={() => toggleFavorite(dish)}
+              onPress={handleToggleFavorite}
               activeOpacity={0.7}
             >
               {isCurrentlyFavorite ? (

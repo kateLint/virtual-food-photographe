@@ -17,7 +17,7 @@ export async function parseMenu(menu: string): Promise<string[]> {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Parse the following restaurant menu. Extract only the names of the dishes. Return the result as a JSON array of strings. Do not include descriptions, prices, or categories. Menu: \n\n ${menu}`,
+      contents: `Parse the following restaurant menu. Extract only the names of the dishes. Return the result as a JSON array of strings. Do not include descriptions, prices, or categories. If the input is just a single dish name or a few words, treat each line or comma-separated item as a dish. Menu: \n\n ${menu}`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -41,11 +41,14 @@ export async function parseMenu(menu: string): Promise<string[]> {
 
   } catch (error: any) {
     console.error("Error parsing menu with Gemini:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
 
     // Get error details from various possible error structures
     const errorMsg = error?.message || '';
     const errorStatus = error?.status || error?.error?.status || '';
     const errorCode = error?.code || error?.error?.code || 0;
+
+    console.log('Error breakdown:', { errorMsg, errorStatus, errorCode });
 
     // Check for specific error types and provide user-friendly messages
     if (errorCode === 503 || errorStatus === 'UNAVAILABLE' || errorMsg.includes('503') || errorMsg.includes('overloaded') || errorMsg.includes('UNAVAILABLE')) {
@@ -57,7 +60,9 @@ export async function parseMenu(menu: string): Promise<string[]> {
     } else if (errorCode === 400 || errorStatus === 'INVALID_ARGUMENT' || errorMsg.includes('400') || errorMsg.includes('INVALID_ARGUMENT')) {
       throw new Error("Invalid menu format. Please check your menu text and try again.");
     } else {
-      throw new Error("Failed to parse menu. Please try again or contact support if the issue persists.");
+      // Include more details in the error for debugging
+      const debugInfo = errorMsg || errorStatus || 'Unknown error';
+      throw new Error(`Failed to parse menu: ${debugInfo}. Please try again.`);
     }
   }
 }

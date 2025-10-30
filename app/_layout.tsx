@@ -1,8 +1,17 @@
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { I18nManager } from 'react-native';
+import { useEffect } from 'react';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 import Svg, { Path } from 'react-native-svg';
+
+// Force LTR layout
+if (I18nManager.isRTL) {
+  I18nManager.allowRTL(false);
+  I18nManager.forceRTL(false);
+}
 
 function HomeIcon({ color }: { color: string }) {
   return (
@@ -23,37 +32,39 @@ function HeartIcon({ color }: { color: string }) {
 
 export default function RootLayout() {
   return (
-    <FavoritesProvider>
-      <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Tabs
-          screenOptions={{
-            headerShown: false,
-            tabBarStyle: {
-              backgroundColor: '#1F2937',
-              borderTopColor: '#374151',
-              borderTopWidth: 1,
-            },
-            tabBarActiveTintColor: '#F59E0B',
-            tabBarInactiveTintColor: '#9CA3AF',
-          }}
-        >
-          <Tabs.Screen
-            name="index"
-            options={{
-              title: 'Home',
-              tabBarIcon: ({ color }) => <HomeIcon color={color} />,
+    <ErrorBoundary>
+      <FavoritesProvider>
+        <SafeAreaProvider>
+          <StatusBar style="light" />
+          <Tabs
+            screenOptions={{
+              headerShown: false,
+              tabBarStyle: {
+                backgroundColor: '#1F2937',
+                borderTopColor: '#374151',
+                borderTopWidth: 1,
+              },
+              tabBarActiveTintColor: '#F59E0B',
+              tabBarInactiveTintColor: '#9CA3AF',
             }}
-          />
-          <Tabs.Screen
-            name="favorites"
-            options={{
-              title: 'Favorites',
-              tabBarIcon: ({ color }) => <HeartIcon color={color} />,
-            }}
-          />
-        </Tabs>
-      </SafeAreaProvider>
-    </FavoritesProvider>
+          >
+            <Tabs.Screen
+              name="index"
+              options={{
+                title: 'Home',
+                tabBarIcon: ({ color }) => <HomeIcon color={color} />,
+              }}
+            />
+            <Tabs.Screen
+              name="favorites"
+              options={{
+                title: 'Favorites',
+                tabBarIcon: ({ color }) => <HeartIcon color={color} />,
+              }}
+            />
+          </Tabs>
+        </SafeAreaProvider>
+      </FavoritesProvider>
+    </ErrorBoundary>
   );
 }
