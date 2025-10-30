@@ -1,4 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { PhotoStyle } from '../types';
 import 'react-native-get-random-values';
 import * as FileSystem from 'expo-file-system';
@@ -11,26 +10,44 @@ if (!apiKey) {
   throw new Error("EXPO_PUBLIC_GEMINI_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey });
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
 export async function parseMenu(menu: string): Promise<string[]> {
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Parse the following restaurant menu. Extract only the names of the dishes. Return the result as a JSON array of strings. Do not include descriptions, prices, or categories. If the input is just a single dish name or a few words, treat each line or comma-separated item as a dish. Menu: \n\n ${menu}`,
-      config: {
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: `Parse the following restaurant menu. Extract only the names of the dishes. Return the result as a JSON array of strings. Do not include descriptions, prices, or categories. If the input is just a single dish name or a few words, treat each line or comma-separated item as a dish. Menu: \n\n ${menu}`
+        }]
+      }],
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.ARRAY,
+          type: "ARRAY",
           items: {
-            type: Type.STRING,
+            type: "STRING",
             description: "The name of a single dish from the menu."
           }
-        },
+        }
+      }
+    };
+
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(requestBody),
     });
 
-    const jsonString = response.text;
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Gemini API error response:', errorData);
+      throw new Error(`HTTP ${response.status}: ${errorData}`);
+    }
+
+    const data = await response.json();
+    const jsonString = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
     const dishNames = JSON.parse(jsonString);
 
     if (Array.isArray(dishNames) && dishNames.every(item => typeof item === 'string')) {
@@ -55,7 +72,7 @@ export async function parseMenu(menu: string): Promise<string[]> {
       throw new Error("The AI service is currently overloaded. Please wait a moment and try again.");
     } else if (errorCode === 429 || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
       throw new Error("Too many requests. Please wait a minute and try again.");
-    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR')) {
+    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR') || errorMsg.includes('Network request failed')) {
       throw new Error("Network error. Please check your internet connection and try again.");
     } else if (errorCode === 400 || errorStatus === 'INVALID_ARGUMENT' || errorMsg.includes('400') || errorMsg.includes('INVALID_ARGUMENT')) {
       throw new Error("Invalid menu format. Please check your menu text and try again.");
@@ -89,28 +106,40 @@ export async function extractTextFromImage(imageUri: string): Promise<string> {
       encoding: FileSystem.EncodingType.Base64,
     });
 
-    // Use Gemini's multimodal capabilities to extract text
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              inlineData: {
-                mimeType: "image/jpeg",
-                data: base64Image
-              }
-            },
-            {
-              text: "Extract all the text from this menu image. Return only the text content, preserving the structure and layout as much as possible. Include dish names, descriptions, and any other text visible in the menu."
+    // Use Gemini's multimodal capabilities to extract text via REST API
+    const requestBody = {
+      contents: [{
+        parts: [
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64Image
             }
-          ]
-        }
-      ]
+          },
+          {
+            text: "Extract all the text from this menu image. Return only the text content, preserving the structure and layout as much as possible. Include dish names, descriptions, and any other text visible in the menu."
+          }
+        ]
+      }]
+    };
+
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
     });
 
-    const extractedText = response.text;
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Gemini API error response:', errorData);
+      throw new Error(`HTTP ${response.status}: ${errorData}`);
+    }
+
+    const data = await response.json();
+    const extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
     console.log('Text extracted successfully from image');
     return extractedText;
   } catch (error: any) {
@@ -126,7 +155,7 @@ export async function extractTextFromImage(imageUri: string): Promise<string> {
       throw new Error("The AI service is currently overloaded. Please wait a moment and try scanning again.");
     } else if (errorCode === 429 || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('429') || errorMsg.includes('rate limit') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
       throw new Error("Too many requests. Please wait a minute and try again.");
-    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR')) {
+    } else if (errorStatus === 'NETWORK_ERROR' || errorMsg.includes('network') || errorMsg.includes('NETWORK_ERROR') || errorMsg.includes('Network request failed')) {
       throw new Error("Network error. Please check your internet connection and try again.");
     } else if (errorCode === 400 || errorStatus === 'INVALID_ARGUMENT' || errorMsg.includes('400') || errorMsg.includes('INVALID_ARGUMENT')) {
       throw new Error("Could not process the image. Please try taking another photo.");
