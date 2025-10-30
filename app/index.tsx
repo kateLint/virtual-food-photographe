@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { Dish, PhotoStyle } from '../types';
@@ -8,6 +8,7 @@ import MenuInput from '../components/MenuInput';
 import StyleSelector from '../components/StyleSelector';
 import ImageGrid from '../components/ImageGrid';
 import SparklesIcon from '../components/icons/SparklesIcon';
+import ConfirmDialog from '../components/ConfirmDialog';
 import 'react-native-get-random-values';
 
 // Simple UUID generator for React Native
@@ -27,6 +28,7 @@ const App: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [showClearDialog, setShowClearDialog] = useState<boolean>(false);
 
   const handleGeneratePhotos = useCallback(async () => {
     if (!menuText.trim()) {
@@ -148,24 +150,13 @@ const App: React.FC = () => {
   }, []);
 
   const handleClearMenu = useCallback(() => {
-    Alert.alert(
-      'Clear Menu',
-      'Are you sure you want to clear the menu text?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            setMenuText('');
-            setDishes([]);
-          }
-        }
-      ]
-    );
+    setShowClearDialog(true);
+  }, []);
+
+  const confirmClearMenu = useCallback(() => {
+    setMenuText('');
+    setDishes([]);
+    setErrorMessage('');
   }, []);
 
   const handleRetryDish = useCallback(async (dishId: string) => {
@@ -187,6 +178,16 @@ const App: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ConfirmDialog
+        visible={showClearDialog}
+        title="Clear Menu"
+        message="Are you sure you want to clear the menu text and all generated photos?"
+        confirmText="Clear"
+        cancelText="Cancel"
+        onConfirm={confirmClearMenu}
+        onCancel={() => setShowClearDialog(false)}
+        destructive={true}
+      />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <LinearGradient

@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nManager } from 'react-native';
 import { useEffect } from 'react';
 import { FavoritesProvider } from '../contexts/FavoritesContext';
+import { ToastProvider } from '../contexts/ToastContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import Svg, { Path } from 'react-native-svg';
 
@@ -33,10 +34,11 @@ function HeartIcon({ color }: { color: string }) {
 export default function RootLayout() {
   return (
     <ErrorBoundary>
-      <FavoritesProvider>
-        <SafeAreaProvider>
-          <StatusBar style="light" />
-          <Tabs
+      <ToastProvider>
+        <FavoritesProvider>
+          <SafeAreaProvider>
+            <StatusBar style="light" />
+            <Tabs
             screenOptions={{
               headerShown: false,
               tabBarStyle: {
@@ -64,7 +66,8 @@ export default function RootLayout() {
             />
           </Tabs>
         </SafeAreaProvider>
-      </FavoritesProvider>
+        </FavoritesProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }

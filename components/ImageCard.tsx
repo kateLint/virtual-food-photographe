@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Animated, TouchableOpacity, Share, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, Animated, TouchableOpacity, Share } from 'react-native';
 import { Dish } from '../types';
 import LoaderIcon from './icons/LoaderIcon';
 import RefreshIcon from './icons/RefreshIcon';
 import Svg, { Path } from 'react-native-svg';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useToast } from '../contexts/ToastContext';
 import * as FileSystem from 'expo-file-system';
 
 interface ImageCardProps {
@@ -15,6 +16,7 @@ interface ImageCardProps {
 const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
   const spinValue = React.useRef(new Animated.Value(0)).current;
   const { favorites, toggleFavorite } = useFavorites();
+  const { showToast } = useToast();
 
   // Calculate favorite status based on current favorites array
   const isCurrentlyFavorite = React.useMemo(() => {
@@ -64,7 +66,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
       });
     } catch (error) {
       console.error('Error sharing image:', error);
-      Alert.alert('Error', 'Failed to share image. Please try again.');
+      showToast('Failed to share image. Please try again.', 'error');
     }
   };
 

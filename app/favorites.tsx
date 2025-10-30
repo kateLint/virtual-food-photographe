@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFavorites } from '../contexts/FavoritesContext';
 import ImageCard from '../components/ImageCard';
 import Toast from '../components/Toast';
@@ -33,7 +33,7 @@ const FavoritesScreen: React.FC = () => {
             newSet.delete(dishId);
             return newSet;
           });
-          Alert.alert('Permission Required', 'Please grant permission to save photos to your library.', [{ text: 'OK', style: 'default' }]);
+          setToast({ visible: true, message: 'Please grant permission to save photos to your library.', type: 'error' });
           return false;
         }
       }
