@@ -30,6 +30,9 @@
     },
     "android": {
       "package": "com.virtualfoodphotographer.app",
+      "versionCode": 2,
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#111827"
@@ -66,7 +69,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "913fa71b-3e50-4fbb-aebc-a438535e8d8e"
       }
     },
     "supportsRTL": false
