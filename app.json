@@ -26,7 +26,8 @@
         "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save your favorite food photos.",
         "NSCameraUsageDescription": "This app needs access to your camera to scan menu photos and extract text."
-      }
+      },
+      "privacyUrl": "https://katelint.github.io/virtual-food-photographe/privacy-policy.html"
     },
     "android": {
       "package": "com.virtualfoodphotographer.app",
@@ -47,7 +48,8 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.CAMERA"
-      ]
+      ],
+      "privacyUrl": "https://katelint.github.io/virtual-food-photographe/privacy-policy.html"
     },
     "web": {
       "bundler": "metro",
