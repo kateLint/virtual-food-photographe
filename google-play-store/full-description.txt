@@ -1,0 +1,47 @@
+Food Photo - AI-Powered Food Photography
+
+Transform any restaurant menu into stunning, professional food photography with the power of AI!
+
+🍽️ KEY FEATURES:
+
+• Menu Input - Type or scan any restaurant menu
+• Smart AI Parsing - Automatically extracts dish names from menu text
+• Camera Scanning - Use OCR to scan physical menus with your camera
+• Multiple Photography Styles:
+  - Rustic/Dark: Moody, artistic food photography
+  - Bright/Modern: Clean, vibrant professional shots
+  - Social Media: Instagram-ready, eye-catching images
+• Instant Generation - AI creates beautiful food photos in seconds
+• Save Favorites - Keep your best images for later
+• Download & Share - Save photos to your device or share with friends
+• Offline Access - View saved favorites anytime
+
+🎨 HOW IT WORKS:
+
+1. Enter or scan a restaurant menu
+2. Choose your preferred photography style
+3. Let AI generate professional food photos
+4. Save your favorites and download them
+
+Perfect for:
+• Food bloggers and influencers
+• Restaurant owners visualizing menu items
+• Food enthusiasts exploring culinary ideas
+• Social media content creators
+• Anyone who loves beautiful food photography
+
+✨ POWERED BY ADVANCED AI:
+- Google Gemini AI for intelligent menu parsing and OCR
+- State-of-the-art image generation technology
+- Fast, reliable, and high-quality results
+
+📱 FEATURES:
+- Clean, intuitive dark theme interface
+- Smooth animations and haptic feedback
+- Organized favorites system
+- Batch download capabilities
+- Professional-grade image quality
+
+Download Food Photo now and bring your menu to life with stunning AI-generated food photography!
+
+Privacy Policy: https://katelint.github.io/virtual-food-photographe/privacy-policy.html

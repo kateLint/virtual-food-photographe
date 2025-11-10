@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Virtual Food Photographer",
+    "name": "Food Photo",
     "slug": "virtual-food-photographer",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "scheme": "virtualfoodphotographer",
+    "scheme": "foodphoto",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -15,7 +15,7 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.virtualfoodphotographer.app",
+      "bundleIdentifier": "com.foodphoto.app",
       "icon": "./assets/icon.png",
       "splash": {
         "image": "./assets/splash.png",
@@ -30,8 +30,8 @@
       "privacyUrl": "https://katelint.github.io/virtual-food-photographe/privacy-policy.html"
     },
     "android": {
-      "package": "com.virtualfoodphotographer.app",
-      "versionCode": 2,
+      "package": "com.foodphoto.app",
+      "versionCode": 4,
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "adaptiveIcon": {

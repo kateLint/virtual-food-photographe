@@ -1,0 +1,195 @@
+FOOD PHOTO - GOOGLE PLAY STORE METADATA
+
+===========================================
+APP INFORMATION
+===========================================
+App Name: Food Photo
+Package: com.foodphoto.app
+Developer: [Your Name/Company]
+Version: 1.0.5
+Version Code: 4
+
+===========================================
+CATEGORIES (Choose Primary + Secondary)
+===========================================
+
+Primary Category Options:
+✓ Photography (RECOMMENDED)
+✓ Food & Drink (RECOMMENDED)
+  Lifestyle
+  Productivity
+  Entertainment
+
+Secondary Category:
+  Lifestyle
+  Productivity
+  Art & Design
+
+===========================================
+KEYWORDS & SEARCH TERMS
+===========================================
+
+Primary Keywords (Most Important):
+- food photography
+- AI food photos
+- restaurant menu
+- food images
+- menu photos
+- AI photography
+- food camera
+
+Secondary Keywords:
+- food blogger
+- food styling
+- restaurant photography
+- menu visualization
+- food content
+- Instagram food
+- social media food
+- food pictures
+- dish photos
+- culinary photography
+- food influencer
+- menu scanner
+- OCR menu
+- AI image generation
+- professional food photos
+
+Long-tail Keywords:
+- "generate food images from menu"
+- "AI restaurant photography"
+- "menu to photos"
+- "food photography generator"
+- "restaurant menu visualizer"
+- "AI food styling"
+- "create food images"
+
+===========================================
+TAGS (Select up to 5 relevant tags)
+===========================================
+1. Food
+2. Photography
+3. AI / Artificial Intelligence
+4. Restaurant
+5. Camera / Image Editing
+
+===========================================
+SEARCH OPTIMIZATION TIPS
+===========================================
+
+Title Variations to Test:
+- Food Photo - AI Food Photography
+- Food Photo: AI Menu to Images
+- Food Photo - Restaurant Photography AI
+- Food Photo: AI Food Image Generator
+
+Use keywords naturally in:
+✓ Short description
+✓ Full description (first 2 paragraphs most important)
+✓ Update/release notes
+✓ Developer reply to reviews
+
+===========================================
+COMPETITOR RESEARCH
+===========================================
+
+Similar Apps to Research:
+- Food photography apps
+- AI image generators
+- Restaurant menu apps
+- Food styling apps
+- Social media content creators
+
+Differentiation Points:
+✓ Menu-specific (not generic food AI)
+✓ Multiple photography styles
+✓ OCR menu scanning
+✓ Favorites system
+✓ Free to use
+✓ Professional quality
+✓ Fast generation
+
+===========================================
+TARGET AUDIENCE
+===========================================
+
+Primary Users:
+- Food bloggers (18-35)
+- Restaurant owners (25-55)
+- Food influencers (18-35)
+- Social media managers (22-40)
+- Culinary students (18-30)
+- Menu designers (25-45)
+
+Secondary Users:
+- Home cooks
+- Recipe creators
+- Food enthusiasts
+- Diet planners
+- Meal prep services
+
+===========================================
+PROMOTIONAL TEXT IDEAS
+===========================================
+
+One-liners:
+- "Turn any menu into stunning food photos"
+- "AI-powered food photography in seconds"
+- "Your menu, professionally photographed"
+- "Restaurant photography made easy"
+- "From menu text to beautiful food images"
+
+Feature Callouts:
+• Instant AI Generation
+• Professional Photography Styles
+• Camera Menu Scanning
+• Save & Share Favorites
+• No Photography Skills Required
+• Restaurant-Grade Quality
+
+===========================================
+LOCALIZATION PRIORITIES
+===========================================
+
+High Priority Languages:
+1. English (US, UK, AU)
+2. Spanish (ES, MX)
+3. French (FR)
+4. German (DE)
+5. Japanese (JP)
+6. Chinese Simplified (CN)
+7. Portuguese (BR)
+8. Italian (IT)
+
+Food & Restaurant Market Focus:
+- United States
+- United Kingdom
+- France
+- Italy
+- Spain
+- Japan
+- China
+- India
+
+===========================================
+SEASONAL/TRENDING OPPORTUNITIES
+===========================================
+
+- Restaurant Week events
+- Food blogger conferences
+- National Food Holidays
+- Instagram/TikTok food trends
+- New restaurant openings
+- Food festival seasons
+- Holiday menu planning
+
+===========================================
+NOTES
+===========================================
+
+- Monitor competitor keywords monthly
+- A/B test store listing graphics
+- Track conversion rate from views to installs
+- Optimize based on search terms users find you with
+- Update keywords based on user reviews and feedback
+- Consider seasonal keyword adjustments

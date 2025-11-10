@@ -1,0 +1,6 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Background color used while drawing the Expo splash view (image is drawn by the library) -->
+  <item android:drawable="@color/splashscreen_background"/>
+</layer-list>
+
+
