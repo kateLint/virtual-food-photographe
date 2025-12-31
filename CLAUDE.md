@@ -18,15 +18,22 @@ npm run web                    # Run in web browser (optional)
 
 ### Environment Setup
 ```bash
-# Create .env file with your API key
-echo "EXPO_PUBLIC_GEMINI_API_KEY=your-api-key-here" > .env
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and add your API key
+# Get your key from: https://aistudio.google.com/app/apikey
 ```
+
+**Important**: The `.env` file is git-ignored. Never commit API keys to the repository.
 
 ### Building for Production
 ```bash
-npm run build:android          # Build Android APK/AAB
+npm run build:android          # Build Android APK/AAB with EAS
 npm run build:ios              # Build iOS IPA (requires macOS)
 ```
+
+See [PRODUCTION.md](./PRODUCTION.md) for detailed production deployment instructions.
 
 ## Technology Stack
 
@@ -44,8 +51,8 @@ npm run build:ios              # Build iOS IPA (requires macOS)
 - **expo-file-system** - File operations (base64 conversion, downloads)
 - **expo-image-picker** - Camera access for menu scanning
 - **expo-sharing** - Share functionality
-- **Google Gemini AI API** (@google/genai ^1.26.0)
-  - Gemini 2.5 Flash - Menu parsing (structured JSON output) and OCR
+- **Google Gemini AI API** (REST API via fetch)
+  - Gemini 2.0 Flash Experimental - Menu parsing (structured JSON output) and OCR
 - **Pollinations.ai** - Free image generation API (replaced Imagen 4.0)
 
 ## Project Structure

@@ -65,7 +65,9 @@ const FavoritesScreen: React.FC = () => {
       }
       return true;
     } catch (error) {
-      console.error('Error saving image:', error);
+      if (__DEV__) {
+        console.error('Error saving image:', error);
+      }
 
       // Remove from downloading set
       setDownloadingIds(prev => {

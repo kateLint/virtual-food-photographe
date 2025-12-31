@@ -70,7 +70,9 @@ const App: React.FC = () => {
           setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'completed', imageUrl } : d));
           return { id: dish.id, ok: true } as const;
         } catch (e) {
-          console.error(`Failed to generate image for ${dish.name}:`, e);
+          if (__DEV__) {
+            console.error(`Failed to generate image for ${dish.name}:`, e);
+          }
           setDishes(prev => prev.map(d => d.id === dish.id ? { ...d, status: 'failed' } : d));
           return { id: dish.id, ok: false } as const;
         }
@@ -92,7 +94,9 @@ const App: React.FC = () => {
       await Promise.all(generationPromises);
 
     } catch (err: any) {
-      console.error(err);
+      if (__DEV__) {
+        console.error(err);
+      }
       setErrorMessage(err?.message || 'An unexpected error occurred. Please try again.');
       setIsButtonDisabled(false);
     } finally {
@@ -137,13 +141,17 @@ const App: React.FC = () => {
 
         // Success - no need to show a message, the text will appear in the input
       } catch (error: any) {
-        console.error('OCR Error:', error);
+        if (__DEV__) {
+          console.error('OCR Error:', error);
+        }
         setErrorMessage(error?.message || 'Failed to extract text from the image. Please try again or type the menu manually.');
       } finally {
         setIsScanning(false);
       }
     } catch (error) {
-      console.error('Camera Error:', error);
+      if (__DEV__) {
+        console.error('Camera Error:', error);
+      }
       setErrorMessage('Failed to open camera. Please try again.');
       setIsScanning(false);
     }
@@ -171,7 +179,9 @@ const App: React.FC = () => {
       const imageUrl = `data:image/jpeg;base64,${base64Image}`;
       setDishes(prev => prev.map(d => d.id === dishId ? { ...d, status: 'completed', imageUrl } : d));
     } catch (e) {
-      console.error(`Failed to generate image for ${dish.name}:`, e);
+      if (__DEV__) {
+        console.error(`Failed to generate image for ${dish.name}:`, e);
+      }
       setDishes(prev => prev.map(d => d.id === dishId ? { ...d, status: 'failed' } : d));
     }
   }, [dishes, selectedStyle]);

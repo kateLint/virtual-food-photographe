@@ -21,17 +21,23 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
   // Calculate favorite status based on current favorites array
   const isCurrentlyFavorite = React.useMemo(() => {
     const isFav = favorites.some(fav => fav.id === dish.id);
-    console.log(`[ImageCard] Dish: ${dish.name}, ID: ${dish.id}, isFavorite: ${isFav}, Total favorites: ${favorites.length}`);
+    if (__DEV__) {
+      console.log(`[ImageCard] Dish: ${dish.name}, ID: ${dish.id}, isFavorite: ${isFav}, Total favorites: ${favorites.length}`);
+    }
     return isFav;
   }, [favorites, dish.id, dish.name]);
 
   const handleToggleFavorite = async () => {
-    console.log(`[ImageCard] ===== FAVORITE BUTTON PRESSED =====`);
-    console.log(`[ImageCard] Dish: ${dish.name}, ID: ${dish.id}`);
-    console.log(`[ImageCard] Current state - isCurrentlyFavorite: ${isCurrentlyFavorite}`);
-    console.log(`[ImageCard] About to call toggleFavorite...`);
+    if (__DEV__) {
+      console.log(`[ImageCard] ===== FAVORITE BUTTON PRESSED =====`);
+      console.log(`[ImageCard] Dish: ${dish.name}, ID: ${dish.id}`);
+      console.log(`[ImageCard] Current state - isCurrentlyFavorite: ${isCurrentlyFavorite}`);
+      console.log(`[ImageCard] About to call toggleFavorite...`);
+    }
     await toggleFavorite(dish);
-    console.log(`[ImageCard] toggleFavorite completed`);
+    if (__DEV__) {
+      console.log(`[ImageCard] toggleFavorite completed`);
+    }
   };
 
   React.useEffect(() => {
@@ -65,7 +71,9 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
         message: `Check out this ${dish.name} photo!`,
       });
     } catch (error) {
-      console.error('Error sharing image:', error);
+      if (__DEV__) {
+        console.error('Error sharing image:', error);
+      }
       showToast('Failed to share image. Please try again.', 'error');
     }
   };

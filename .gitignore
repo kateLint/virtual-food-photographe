@@ -25,9 +25,13 @@ web-build/
 *.p12
 *.key
 *.mobileprovision
-*.orig.*
 *.ipa
 *.apk
+*.aab
+
+# Credentials
+credentials/
+credentials.json
 
 # Metro
 .metro-health-check*

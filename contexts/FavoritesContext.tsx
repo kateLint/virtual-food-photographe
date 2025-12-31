@@ -28,17 +28,25 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setFavorites(JSON.parse(storedFavorites));
       }
     } catch (error) {
-      console.error('Error loading favorites:', error);
+      if (__DEV__) {
+        console.error('Error loading favorites:', error);
+      }
     }
   };
 
   const saveFavoritesToStorage = async (newFavorites: Dish[]) => {
     try {
-      console.log(`[FavoritesContext] Saving ${newFavorites.length} favorites to storage`);
+      if (__DEV__) {
+        console.log(`[FavoritesContext] Saving ${newFavorites.length} favorites to storage`);
+      }
       await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(newFavorites));
-      console.log(`[FavoritesContext] Favorites saved to storage`);
+      if (__DEV__) {
+        console.log(`[FavoritesContext] Favorites saved to storage`);
+      }
     } catch (error) {
-      console.error('Error saving favorites:', error);
+      if (__DEV__) {
+        console.error('Error saving favorites:', error);
+      }
     }
   };
 
@@ -63,19 +71,28 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const toggleFavorite = async (dish: Dish) => {
-    console.log(`[FavoritesContext] Toggle favorite for: ${dish.name}, ID: ${dish.id}`);
+    if (__DEV__) {
+      console.log(`[FavoritesContext] Toggle favorite for: ${dish.name}, ID: ${dish.id}`);
+    }
 
     setFavorites(prevFavorites => {
       const isCurrentlyFavorite = prevFavorites.some(fav => fav.id === dish.id);
-      console.log(`[FavoritesContext] Current favorites count: ${prevFavorites.length}`);
-      console.log(`[FavoritesContext] Is currently favorite: ${isCurrentlyFavorite}`);
+
+      if (__DEV__) {
+        console.log(`[FavoritesContext] Current favorites count: ${prevFavorites.length}`);
+        console.log(`[FavoritesContext] Is currently favorite: ${isCurrentlyFavorite}`);
+      }
 
       let newFavorites: Dish[];
       if (isCurrentlyFavorite) {
-        console.log(`[FavoritesContext] Removing from favorites`);
+        if (__DEV__) {
+          console.log(`[FavoritesContext] Removing from favorites`);
+        }
         newFavorites = prevFavorites.filter(fav => fav.id !== dish.id);
       } else {
-        console.log(`[FavoritesContext] Adding to favorites`);
+        if (__DEV__) {
+          console.log(`[FavoritesContext] Adding to favorites`);
+        }
         newFavorites = [...prevFavorites, dish];
       }
 

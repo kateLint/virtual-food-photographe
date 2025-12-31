@@ -4,8 +4,6 @@ import * as FileSystem from 'expo-file-system';
 
 const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
-console.log('API Key loaded:', apiKey ? `${apiKey.substring(0, 15)}...` : 'NOT FOUND');
-
 if (!apiKey) {
   throw new Error("EXPO_PUBLIC_GEMINI_API_KEY environment variable not set");
 }
@@ -42,7 +40,9 @@ export async function parseMenu(menu: string): Promise<string[]> {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Gemini API error response:', errorData);
+      if (__DEV__) {
+        console.error('Gemini API error response:', errorData);
+      }
       throw new Error(`HTTP ${response.status}: ${errorData}`);
     }
 
@@ -57,15 +57,19 @@ export async function parseMenu(menu: string): Promise<string[]> {
     }
 
   } catch (error: any) {
-    console.error("Error parsing menu with Gemini:", error);
-    console.error("Error details:", JSON.stringify(error, null, 2));
+    if (__DEV__) {
+      console.error("Error parsing menu with Gemini:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+    }
 
     // Get error details from various possible error structures
     const errorMsg = error?.message || '';
     const errorStatus = error?.status || error?.error?.status || '';
     const errorCode = error?.code || error?.error?.code || 0;
 
-    console.log('Error breakdown:', { errorMsg, errorStatus, errorCode });
+    if (__DEV__) {
+      console.log('Error breakdown:', { errorMsg, errorStatus, errorCode });
+    }
 
     // Check for specific error types and provide user-friendly messages
     if (errorCode === 503 || errorStatus === 'UNAVAILABLE' || errorMsg.includes('503') || errorMsg.includes('overloaded') || errorMsg.includes('UNAVAILABLE')) {
@@ -99,7 +103,9 @@ const getStylePrompt = (style: PhotoStyle): string => {
 
 export async function extractTextFromImage(imageUri: string): Promise<string> {
   try {
-    console.log('Extracting text from menu image...');
+    if (__DEV__) {
+      console.log('Extracting text from menu image...');
+    }
 
     // Read the image as base64
     const base64Image = await FileSystem.readAsStringAsync(imageUri, {
@@ -133,17 +139,23 @@ export async function extractTextFromImage(imageUri: string): Promise<string> {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Gemini API error response:', errorData);
+      if (__DEV__) {
+        console.error('Gemini API error response:', errorData);
+      }
       throw new Error(`HTTP ${response.status}: ${errorData}`);
     }
 
     const data = await response.json();
     const extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    console.log('Text extracted successfully from image');
+    if (__DEV__) {
+      console.log('Text extracted successfully from image');
+    }
     return extractedText;
   } catch (error: any) {
-    console.error("Error extracting text from image:", error);
+    if (__DEV__) {
+      console.error("Error extracting text from image:", error);
+    }
 
     // Get error details from various possible error structures
     const errorMsg = error?.message || '';
@@ -174,7 +186,9 @@ export async function generateFoodImage(dishName: string, style: PhotoStyle): Pr
     const encodedPrompt = encodeURIComponent(prompt);
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=600&nologo=true&enhance=true`;
 
-    console.log(`Generating image for "${dishName}"...`);
+    if (__DEV__) {
+      console.log(`Generating image for "${dishName}"...`);
+    }
 
     // Download and convert to base64 using expo-file-system
     const fileUri = FileSystem.cacheDirectory + `${dishName.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
@@ -189,10 +203,14 @@ export async function generateFoodImage(dishName: string, style: PhotoStyle): Pr
       encoding: FileSystem.EncodingType.Base64,
     });
 
-    console.log(`Image generated successfully for "${dishName}"`);
+    if (__DEV__) {
+      console.log(`Image generated successfully for "${dishName}"`);
+    }
     return base64;
   } catch (error) {
-    console.error(`Error generating image for "${dishName}":`, error);
+    if (__DEV__) {
+      console.error(`Error generating image for "${dishName}":`, error);
+    }
     throw new Error(`Failed to generate an image for ${dishName}.`);
   }
 }

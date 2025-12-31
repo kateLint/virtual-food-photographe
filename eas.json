@@ -14,17 +14,11 @@
       },
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyCfD2Hel11oKwtuH13z55J_WEEveLD-GYA"
       }
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyCfD2Hel11oKwtuH13z55J_WEEveLD-GYA"
       }
     }
   },
