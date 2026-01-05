@@ -104,6 +104,9 @@ const ImageCard: React.FC<ImageCardProps> = ({ dish, onRetry }) => {
               style={styles.favoriteButton}
               onPress={handleToggleFavorite}
               activeOpacity={0.7}
+              accessibilityLabel={isCurrentlyFavorite ? "Remove from favorites" : "Add to favorites"}
+              accessibilityHint={isCurrentlyFavorite ? "Removes this photo from your favorites" : "Saves this photo to your favorites"}
+              accessibilityRole="button"
             >
               {isCurrentlyFavorite ? (
                 <Svg width={20} height={20} viewBox="0 0 24 24">

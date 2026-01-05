@@ -22,6 +22,10 @@ const MenuInput: React.FC<MenuInputProps> = ({ value, onChange, onCameraPress, o
             style={styles.cameraButton}
             disabled={isScanning}
             activeOpacity={0.7}
+            accessibilityLabel="Scan menu with camera"
+            accessibilityHint="Opens camera to scan and extract text from physical menu"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isScanning, busy: isScanning }}
           >
             <CameraIcon width={20} height={20} color={isScanning ? '#6B7280' : '#F59E0B'} />
             <Text style={[styles.cameraButtonText, isScanning && styles.cameraButtonTextDisabled]}>
@@ -46,12 +50,17 @@ Pasta with eggs, cheese, pancetta, and pepper."
         numberOfLines={10}
         style={styles.textInput}
         textAlignVertical="top"
+        accessibilityLabel="Menu text input"
+        accessibilityHint="Enter or paste your restaurant menu here"
       />
       {value.trim().length > 0 && onClearPress && (
         <TouchableOpacity
           onPress={onClearPress}
           style={styles.clearButton}
           activeOpacity={0.7}
+          accessibilityLabel="Clear menu"
+          accessibilityHint="Clears all menu text and generated photos"
+          accessibilityRole="button"
         >
           <TrashIcon width={20} height={20} color="#EF4444" />
         </TouchableOpacity>

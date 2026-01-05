@@ -244,6 +244,10 @@ const App: React.FC = () => {
             disabled={isScanning || isButtonDisabled}
             style={[styles.button, (isScanning || isButtonDisabled) && styles.buttonDisabled]}
             activeOpacity={0.8}
+            accessibilityLabel="Generate food photos"
+            accessibilityHint="Creates AI-generated professional food photos from your menu text"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isScanning || isButtonDisabled }}
           >
             <LinearGradient
               colors={(isScanning || isButtonDisabled) ? ['#6B7280', '#9CA3AF'] : ['#EA580C', '#F59E0B']}
