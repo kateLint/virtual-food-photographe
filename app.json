@@ -15,7 +15,7 @@
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.foodphoto.app",
+      "bundleIdentifier": "com.virtualfoodphotographer.app",
       "buildNumber": "1.0.6",
       "icon": "./assets/icon.png",
       "splash": {
