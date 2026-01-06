@@ -17,7 +17,12 @@
 - Distribution: App Store
 - Bundle ID: com.virtualfoodphotographer.app
 
-**Download IPA:**
+**IPA Filename:**
+```
+application-27426cf4-64ef-4350-8091-ab9967691459.ipa
+```
+
+**Download URL:**
 ```
 https://expo.dev/artifacts/eas/5RbqNr4EnxXRPiZDkNhzTF.ipa
 ```
@@ -68,8 +73,9 @@ Then enter your Apple ID when prompted.
 
 **Option B: Transporter App**
 1. Download IPA from: https://expo.dev/artifacts/eas/5RbqNr4EnxXRPiZDkNhzTF.ipa
+   - Filename: `application-27426cf4-64ef-4350-8091-ab9967691459.ipa`
 2. Open Transporter app (macOS)
-3. Drag and drop IPA file
+3. Drag and drop `application-27426cf4-64ef-4350-8091-ab9967691459.ipa` file
 4. Click "Deliver"
 
 ### Step 2: Create App Listing

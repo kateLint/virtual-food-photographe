@@ -16,6 +16,7 @@ Before you begin, ensure you have:
 
 **Build Information:**
 - Build ID: `27426cf4-64ef-4350-8091-ab9967691459`
+- IPA Filename: `application-27426cf4-64ef-4350-8091-ab9967691459.ipa`
 - IPA Download: https://expo.dev/artifacts/eas/5RbqNr4EnxXRPiZDkNhzTF.ipa
 - Version: 1.0.6
 - Build Number: 1
@@ -40,14 +41,15 @@ You'll be prompted for:
 
 1. **Download the IPA:**
    - Open: https://expo.dev/artifacts/eas/5RbqNr4EnxXRPiZDkNhzTF.ipa
-   - Save to your Downloads folder
+   - Save as: `application-27426cf4-64ef-4350-8091-ab9967691459.ipa`
+   - Default location: Downloads folder
 
 2. **Open Transporter:**
    - macOS: Search for "Transporter" in Spotlight (Cmd+Space)
    - Or download from: https://apps.apple.com/app/transporter/id1450874784
 
 3. **Upload:**
-   - Drag and drop the .ipa file into Transporter
+   - Drag and drop `application-27426cf4-64ef-4350-8091-ab9967691459.ipa` into Transporter
    - Click "Deliver"
    - Sign in with your Apple ID if prompted
    - Wait for upload to complete (5-10 minutes)
