@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.virtualfoodphotographer.app",
-      "buildNumber": "1.0.6",
+      "buildNumber": "2",
       "icon": "./assets/icon.png",
       "splash": {
         "image": "./assets/splash.png",
