@@ -1,6 +1,6 @@
 # Privacy Policy for Virtual Food Photographer
 
-**Last updated:** November 4, 2025
+**Last updated:** January 5, 2026
 
 ## Introduction
 
@@ -84,7 +84,7 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 
 If you have questions about this Privacy Policy, please contact us at:
 
-**Email**: kerenlint@example.com
+**Email**: kerenlint@gmail.com
 **App Name**: Virtual Food Photographer
 
 ## Compliance
